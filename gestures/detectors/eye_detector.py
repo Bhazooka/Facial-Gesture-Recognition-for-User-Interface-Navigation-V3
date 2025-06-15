@@ -1,7 +1,28 @@
 import keyboard
+import pyautogui
 from config.settings import (
     EYE_BLINK_HEIGHT, EYE_SQUINT_HEIGHT, EYE_OPEN_HEIGHT, EYE_BUGGED_HEIGHT, WAIT_FRAMES
 )
+import screeninfo
+
+def get_screen_size():
+    # Get the primary monitor's size
+    screen = screeninfo.get_monitors()[0]
+    return screen.width, screen.height
+
+def estimate_gaze(face):
+    # Example: Use the right eye for gaze estimation
+    # You may need to adjust indices for your model
+    eye_center = face[468]  # Example: iris center
+    eye_left = face[133]
+    eye_right = face[33]
+    eye_top = face[159]
+    eye_bottom = face[145]
+
+    # Normalize iris position within the eye rectangle
+    x_ratio = (eye_center.x - eye_left.x) / (eye_right.x - eye_left.x)
+    y_ratio = (eye_center.y - eye_top.y) / (eye_bottom.y - eye_top.y)
+    return x_ratio, y_ratio
 
 def process_eyes(engine, face):
     # Eye measurements
@@ -78,3 +99,17 @@ def process_eyes(engine, face):
     engine.winkedL, engine.winkedL_frames = engine.timeout_double(engine.winkedL, engine.winkedL_frames)
     engine.winkedR, engine.winkedR_frames = engine.timeout_double(engine.winkedR, engine.winkedR_frames)
     engine.blink_count, engine.blinking_frames = engine.timeout_double(engine.blink_count, engine.blinking_frames)
+
+    # --- Gaze tracking and mouse control ---
+    try:
+        x_ratio, y_ratio = estimate_gaze(face)
+        screen_w, screen_h = get_screen_size()
+        # Clamp ratios between 0 and 1
+        x_ratio = min(max(x_ratio, 0), 1)
+        y_ratio = min(max(y_ratio, 0), 1)
+        # Map to screen coordinates
+        mouse_x = int(x_ratio * screen_w)
+        mouse_y = int(y_ratio * screen_h)
+        pyautogui.moveTo(mouse_x, mouse_y, duration=0.1)
+    except Exception as e:
+        print("Gaze estimation failed:", e)
