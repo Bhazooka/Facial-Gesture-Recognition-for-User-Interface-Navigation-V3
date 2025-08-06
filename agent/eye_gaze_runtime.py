@@ -45,7 +45,7 @@ face_mesh = mp.solutions.face_mesh.FaceMesh(refine_landmarks=True)
 alpha = 0.7
 prev_x, prev_y = None, None
 
-def predict_gaze(frame):
+def predict_gaze(frame, return_eye=False):
     global prev_x, prev_y
     rgb_frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
     result = face_mesh.process(rgb_frame)
@@ -61,7 +61,7 @@ def predict_gaze(frame):
             eye_box = cv.cvtColor(eye_box, cv.COLOR_BGR2GRAY)
             eye_box = cv.resize(eye_box, (100, 50))
         except:
-            return None, None
+            return None, None, None
 
         pil_image = Image.fromarray(eye_box)
         eye_tensor = transform(pil_image).unsqueeze(0).to(device)
@@ -77,5 +77,8 @@ def predict_gaze(frame):
             y = alpha * prev_y + (1 - alpha) * y
             prev_x, prev_y = x, y
 
-            return int(x), int(y)
-    return None, None
+            if return_eye:
+                return int(x), int(y), eye_box
+            else:
+                return int(x), int(y), None
+    return None, None, None

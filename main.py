@@ -1,7 +1,9 @@
 import cv2
 import mediapipe as mp
 from datetime import datetime
+import pyautogui
 
+from agent.eye_gaze_runtime import predict_gaze
 from utils.morse import morse
 from gestures.gesture_engine import GestureEngine
 from utils.draw_utils import draw_frame
@@ -10,6 +12,11 @@ from config.settings import (
 )
 from camera.frame_grabber import get_video_capture, get_frame, release_capture
 from camera.landmark_tracker import get_face_mesh, process_face_mesh
+
+
+SHOW_EYE_WINDOW = True  # Change to False to disable the cropped eye display
+
+
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -36,6 +43,19 @@ while cap.isOpened():
     image.flags.writeable = False
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     results = process_face_mesh(face_mesh, image)
+
+    # gaze_x, gaze_y = predict_gaze(image)
+    # if gaze_x is not None and gaze_y is not None:
+    #     pyautogui.moveTo(gaze_x, gaze_y)
+
+    gaze_x, gaze_y, eye_img = predict_gaze(image, return_eye=SHOW_EYE_WINDOW)
+    if gaze_x is not None and gaze_y is not None:
+        pyautogui.moveTo(gaze_x, gaze_y)
+
+    # Show eye window if enabled
+    if SHOW_EYE_WINDOW and eye_img is not None:
+        cv2.imshow("Eye View", eye_img)
+
 
     image.flags.writeable = True
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
