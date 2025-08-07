@@ -1,7 +1,7 @@
 import keyboard
-from utils.morse import morse
+from utils.keystrokes import KEY_STROKES
 
-def type_and_remember(current_morse, last_typed, command_on, control_on, shift_on):
+def type_and_remember(current_keys, last_typed, command_on, control_on, shift_on):
     keys = []
     if command_on:
         keys.append('command')
@@ -9,7 +9,7 @@ def type_and_remember(current_morse, last_typed, command_on, control_on, shift_o
         keys.append('control')
     if shift_on:
         keys.append('shift')
-    letter = morse.get(current_morse, '')
+    letter = KEY_STROKES.get(current_keys, '')
     if len(letter):
         keys.append(letter)
     keystring = '+'.join(keys)

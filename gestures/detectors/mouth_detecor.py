@@ -27,9 +27,9 @@ def process_mouth(engine, face, face_mid_top, face_mid_bottom, face_mid_right, f
     if (not engine.mouth_open) and (engine.mouth_open_frames >= MOUTH_OPEN_SHORT_FRAMES):
         if engine.mouth_closed_frames >= MOUTH_CLOSED_FRAMES:
             if engine.mouth_open_frames >= MOUTH_OPEN_LONG_FRAMES:
-                engine.current_morse += '-'
+                engine.current_keys += '-'
             elif engine.mouth_closed_frames >= MOUTH_CLOSED_FRAMES:
-                engine.current_morse += '.'
+                engine.current_keys += '.'
             engine.mouth_open_frames = 0
             engine.mouth_closed_frames = 0
         else:
@@ -46,9 +46,9 @@ def process_mouth(engine, face, face_mid_top, face_mid_bottom, face_mid_right, f
         engine.mouth_scrunched_frames += 1
 
     if (nose_to_mouth < MOUTH_NOSE_SCRUNCH) and mouth_frowny:
-        engine.current_morse, engine.last_typed = type_and_remember(
-            engine.current_morse, engine.last_typed, engine.command_on, engine.control_on, engine.shift_on)
-        engine.current_morse = ''
+        engine.current_keys, engine.last_typed = type_and_remember(
+            engine.current_keys, engine.last_typed, engine.command_on, engine.control_on, engine.shift_on)
+        engine.current_keys = ''
         if not engine.mouth_scrunched:
             engine.mouth_scrunched_count += 1
             print("mouth scrunch", nose_to_mouth)
@@ -58,17 +58,17 @@ def process_mouth(engine, face, face_mid_top, face_mid_bottom, face_mid_right, f
 
     if engine.mouth_scrunched_count >= 3:
         print("triple scrunch: ENTER")
-        engine.current_morse = 'enter'
-        engine.current_morse, engine.last_typed = type_and_remember(
-            engine.current_morse, engine.last_typed, engine.command_on, engine.control_on, engine.shift_on)
+        engine.current_keys = 'enter'
+        engine.current_keys, engine.last_typed = type_and_remember(
+            engine.current_keys, engine.last_typed, engine.command_on, engine.control_on, engine.shift_on)
         engine.mouth_scrunched_frames = 0
         engine.mouth_scrunched_count = 0
     elif engine.mouth_scrunched_count == 2:
         if engine.mouth_scrunched_frames > WAIT_FRAMES:
             print("double scrunch: SPACE")
-            engine.current_morse = 'space'
-            engine.current_morse, engine.last_typed = type_and_remember(
-                engine.current_morse, engine.last_typed, engine.command_on, engine.control_on, engine.shift_on)
+            engine.current_keys = 'space'
+            engine.current_keys, engine.last_typed = type_and_remember(
+                engine.current_keys, engine.last_typed, engine.command_on, engine.control_on, engine.shift_on)
             engine.mouth_scrunched_frames = 0
             engine.mouth_scrunched_count = 0
     elif (engine.mouth_scrunched_count == 1) and (engine.mouth_scrunched_frames > WAIT_FRAMES):

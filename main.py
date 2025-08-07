@@ -4,17 +4,15 @@ from datetime import datetime
 import pyautogui
 
 from agent.eye_gaze_runtime import predict_gaze
-# from utils.morse import morse
+from logs.eye_performance import EyePerformanceMetrics
+# from utils.keystroke import KEY_STROKES
 from gestures.gesture_engine import GestureEngine
 from utils.draw_utils import draw_frame
 from config.settings import (
-    CAMERA, RECORDING, FPS, RECORDING_FILENAME
+    CAMERA, RECORDING, FPS, RECORDING_FILENAME, SHOW_EYE_WINDOW
 )
 from camera.frame_grabber import get_video_capture, get_frame, release_capture
 from camera.landmark_tracker import get_face_mesh, process_face_mesh
-
-
-SHOW_EYE_WINDOW = False  # Change to False to disable the cropped eye display
 
 
 
@@ -24,8 +22,9 @@ mp_face_mesh = mp.solutions.face_mesh
 
 drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
 
-# Initialize gesture engine
+# Initialize gesture engine and performance metrics
 gesture_engine = GestureEngine()
+metrics = EyePerformanceMetrics()
 
 cap = get_video_capture(CAMERA)
 
@@ -50,7 +49,7 @@ while cap.isOpened():
     # if gaze_x is not None and gaze_y is not None:
     #     pyautogui.moveTo(gaze_x, gaze_y)
 
-    gaze_x, gaze_y, eye_img = predict_gaze(image, return_eye=SHOW_EYE_WINDOW)
+    gaze_x, gaze_y, eye_img = predict_gaze(image, return_eye=SHOW_EYE_WINDOW, metrics=metrics)
     if gaze_x is not None and gaze_y is not None:
         pyautogui.moveTo(gaze_x, gaze_y)
 
@@ -64,13 +63,13 @@ while cap.isOpened():
 
     if results.multi_face_landmarks and len(results.multi_face_landmarks) > 0:
         face_landmarks = results.multi_face_landmarks[0]
-        # All gesture recognition is now handled by the gesture engine
+        # gesture recognition is handled by the gesture engine
         gesture_engine.process_gestures(face_landmarks.landmark)
 
         draw_frame(
             image, face_landmarks,
             mp_drawing, mp_drawing_styles, mp_face_mesh,
-            gesture_engine.current_morse
+            gesture_engine.current_keys
         )
         if RECORDING:
             recording.write(image)
@@ -84,3 +83,6 @@ if RECORDING:
 
 release_capture(cap)
 cv2.destroyAllWindows()
+
+# Display performance metrics
+metrics.plot_metrics()

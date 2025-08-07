@@ -3,6 +3,8 @@ from datetime import datetime
 # CAMERA = 1 # Usually 0, depends on input device(s)
 CAMERA = 0
 
+SHOW_EYE_WINDOW = False  # Change to False to disable the cropped eye display
+
 # Optionally record the video feed to a timestamped AVI in the current directory
 RECORDING = False
 FPS = 10

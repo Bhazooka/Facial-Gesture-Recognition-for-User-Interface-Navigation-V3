@@ -48,7 +48,7 @@ class GestureEngine:
         self.control_on = False
         self.shift_on = False
         
-        self.current_morse = ''
+        self.current_keys = ''
         self.last_typed = ''
 
     def get_aspect_ratio(self, top, bottom, right, left):

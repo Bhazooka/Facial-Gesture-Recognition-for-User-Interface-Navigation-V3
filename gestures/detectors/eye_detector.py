@@ -54,8 +54,8 @@ def process_eyes(engine, face):
         engine.command_on = True
         engine.winkedL = True
         if engine.winkedR and (engine.winkedR_frames < WAIT_FRAMES):
-            print("clear Morse queue")
-            engine.current_morse = ''
+            print("clear keystroke queue")
+            engine.current_keys = ''
             engine.winkedR_frames = 0
             engine.winkedR = False
     elif eyeA_ar < EYE_SQUINT_HEIGHT:

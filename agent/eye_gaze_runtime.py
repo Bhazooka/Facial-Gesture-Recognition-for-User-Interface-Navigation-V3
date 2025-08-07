@@ -3,6 +3,8 @@ from torchvision import transforms
 import cv2 as cv
 from PIL import Image
 import mediapipe as mp
+import time
+from logs.eye_performance import EyePerformanceMetrics
 
 # Same CNN model from training
 class EyeGazeCNN(torch.nn.Module):
@@ -49,8 +51,9 @@ face_mesh = mp.solutions.face_mesh.FaceMesh(refine_landmarks=True)
 alpha = 0.7
 prev_x, prev_y = None, None
 
-def predict_gaze(frame, return_eye=False): # core logic, runs on each video frame
+def predict_gaze(frame, return_eye=False, metrics=None): # core logic, runs on each video frame
     global prev_x, prev_y    # previous gaze coord to smooth gaze pred
+    start_time = time.time()
     rgb_frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB) 
     result = face_mesh.process(rgb_frame)
 
@@ -81,7 +84,14 @@ def predict_gaze(frame, return_eye=False): # core logic, runs on each video fram
             y = alpha * prev_y + (1 - alpha) * y 
             prev_x, prev_y = x, y
 
-            if return_eye: # if return eye is treu show eyebox image
+            # Update metrics if provided
+            if metrics is not None:
+                inference_time = time.time() - start_time
+                metrics.update_inference_time(inference_time)
+                metrics.update_fps()
+                metrics.update_jitter((x, y))
+
+            if return_eye: # if return eye is true show eyebox image
                 return int(x), int(y), eye_box
             else:
                 return int(x), int(y), None # otherwise nothing
