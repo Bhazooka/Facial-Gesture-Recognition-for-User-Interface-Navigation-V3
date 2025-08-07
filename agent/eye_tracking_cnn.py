@@ -57,7 +57,7 @@ val_size = len(dataset) - train_size
 train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
 
 # create dataloaders
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True) # load 32 images
 val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
 
 # Define the CNN Model
@@ -82,8 +82,8 @@ class EyeGazeCNN(nn.Module):
 
 # Initialize the model, loss function, and optimizer
 model = EyeGazeCNN().to(device)
-criterion = nn.MSELoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+criterion = nn.MSELoss() # Mean Squared Error loss function
+optimizer = optim.Adam(model.parameters(), lr=0.001) # adam optimizer chosen to adjust model's weights during training. its efficient and popular for minizing loss function
 scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)  # Learning rate scheduler
 
 # Training and Validation

@@ -4,7 +4,7 @@ from datetime import datetime
 import pyautogui
 
 from agent.eye_gaze_runtime import predict_gaze
-from utils.morse import morse
+# from utils.morse import morse
 from gestures.gesture_engine import GestureEngine
 from utils.draw_utils import draw_frame
 from config.settings import (
@@ -14,7 +14,7 @@ from camera.frame_grabber import get_video_capture, get_frame, release_capture
 from camera.landmark_tracker import get_face_mesh, process_face_mesh
 
 
-SHOW_EYE_WINDOW = True  # Change to False to disable the cropped eye display
+SHOW_EYE_WINDOW = False  # Change to False to disable the cropped eye display
 
 
 
@@ -31,16 +31,18 @@ cap = get_video_capture(CAMERA)
 
 if RECORDING:
     frame_size = (int(cap.get(3)), int(cap.get(4)))
-    recording = cv2.VideoWriter(
-        RECORDING_FILENAME, cv2.VideoWriter_fourcc(*'MJPG'), FPS, frame_size)
+    recording = cv2.VideoWriter( #videowirter is used to compres and save video
+        # MJPG is Motion JPEG
+        RECORDING_FILENAME, cv2.VideoWriter_fourcc(*'MJPG'), FPS, frame_size) 
 
 face_mesh = get_face_mesh()
 while cap.isOpened():
-    success, image = get_frame(cap)
+    success, image = get_frame(cap) # handles the process of reading single frame frp, video stream [success: image sucessfully read | image: holds frame ]
     if not success:
         break
 
-    image.flags.writeable = False
+    image.flags.writeable = False # tells program mp wont modify image data directly. Avoids need for mp to create copy of image in memory
+    # Flip the image horizontally for a later selfie-view display
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     results = process_face_mesh(face_mesh, image)
 
@@ -56,7 +58,7 @@ while cap.isOpened():
     if SHOW_EYE_WINDOW and eye_img is not None:
         cv2.imshow("Eye View", eye_img)
 
-
+    #
     image.flags.writeable = True
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
